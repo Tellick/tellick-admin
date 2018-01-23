@@ -1,38 +1,38 @@
-#connect to the system, the system will ask you to login
+## connect to the system, the system will ask you to login
 tp connect [url]
 
-#add a new customer
+## add a new customer
 tp new customer [customername]
 
-#add a new project
+## add a new project
 tp new project [projectname] -c [customername]
 
-#activate a project
+## activate a project
 tp active [projectname]
 
-#log work for today (in hours), message is mandatory
+## log work for today (in hours), message is mandatory
 tp log [number] -m [message]
 
-#log work for a different date
+## log work for a different date
 tp log [number] -d [yyyy-mm-dd] -m [message]
 
-#set the hourly rate
+## set the hourly rate
 tp set rate [money]
 
-#show progress in this month
+## show progress in this month
 tp show
 
-#show progress in a month
+## show progress in a month
 tp show -d [yyyy-mm]
 
-#show progress in a year
+## show progress in a year
 tp show -d [yyyy]
 
-#generate invoices for this month
+## generate invoices for this month
 tp invoice
 
-#generate invoices for last month
+## generate invoices for last month
 tp invoice lastmonth
 
-#generate invoices for a month
+## generate invoices for a month
 tp invoice -d [yyyy-mm]
