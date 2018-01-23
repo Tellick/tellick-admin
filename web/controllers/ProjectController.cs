@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using tellick_admin.Repository;
 
@@ -14,13 +15,15 @@ namespace tellick_admin.Controllers {
         }
 
         [HttpGet(Name = "GetAllProjects")]
-        public IEnumerable<Project> GetAllProjects() {
-            return _projectRepository.SearchFor();
+        public IActionResult GetAllProjects() {
+            return Ok(_projectRepository.SearchFor());
         }
 
-        [HttpGet("{id}", Name = "GetProject")]
-        public Project GetProject(int id) {
-            return _projectRepository.GetByID(id);
+        [HttpGet("{name}", Name = "GetProject")]
+        public IActionResult GetProject(string name) {
+            Project p = _projectRepository.SearchFor(i => i.Name == name).SingleOrDefault();
+            if (p == null) return NotFound();
+            return Ok(p);
         }
 
         [HttpPost]

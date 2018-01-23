@@ -30,9 +30,11 @@ namespace tellick_admin.Cli {
 
     public class Cli {
         private readonly HttpClient _client;
+        private readonly TpConfig _tpConfig;
 
-        public Cli() {
+        public Cli(TpConfig tpConfig) {
             _client  = new HttpClient();
+            _tpConfig = tpConfig;
         }
 
         public async Task ParseAndRun(string[] args) {
@@ -54,6 +56,13 @@ namespace tellick_admin.Cli {
                                 Console.WriteLine("Unknown entity type '{0}'", args[1]);
                                 break;
                         }
+                    }
+                    break;
+                case "active":
+                    if (args.Length < 2) {
+                        Console.Write("Please provide a project name.");
+                    } else {
+                        await SetActive(args);
                     }
                     break;
                 case "customers":
@@ -113,6 +122,20 @@ namespace tellick_admin.Cli {
                 Console.WriteLine("Project '{0}' created and connected to customer {1}.", projectName, customerName);
             } else {
                 Console.WriteLine("Unknown customer '{0}'", customerName);
+            }
+        }
+
+        public async Task SetActive(string[] args) {
+            string projectName = args[1];
+            HttpResponseMessage message = await _client.GetAsync("http://localhost:5000/api/project/" + WebUtility.UrlEncode(projectName));
+            if (message.StatusCode == HttpStatusCode.NotFound) {
+                Console.WriteLine("Cannot activate project '{0}' as it does not exist!", projectName);
+            } else {
+                _tpConfig.ActiveProject = projectName;
+                TpConfigReaderWriter tpConfigReaderWriter = new TpConfigReaderWriter();
+                tpConfigReaderWriter.TpConfig = _tpConfig;
+                await tpConfigReaderWriter.WriteConfig();
+                Console.WriteLine("Active project set to '{0}'", projectName);
             }
         }
 
