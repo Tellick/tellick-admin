@@ -28,6 +28,18 @@ namespace tellick_admin.Cli {
         public int CustomerId { get; set; }
     }
 
+    [DataContract]  
+    public class Log {
+        [DataMember]  
+        public int Id { get; set; }
+        [DataMember]  
+        public float Hours { get; set; }
+        [DataMember]  
+        public string Message { get; set; }
+        [DataMember]  
+        public int ProjectId { get; set; }
+    }
+
     public class Cli {
         private readonly HttpClient _client;
         private readonly TpConfig _tpConfig;
@@ -63,6 +75,13 @@ namespace tellick_admin.Cli {
                         Console.Write("Please provide a project name.");
                     } else {
                         await SetActive(args);
+                    }
+                    break;
+                case "log":
+                    if (args.Length < 3) {
+                        Console.Write("Please provide an amount of hours and a message like this: tp log [hours] [message]");
+                    } else {
+                        await Log(args);
                     }
                     break;
                 case "customers":
@@ -136,6 +155,30 @@ namespace tellick_admin.Cli {
                 tpConfigReaderWriter.TpConfig = _tpConfig;
                 await tpConfigReaderWriter.WriteConfig();
                 Console.WriteLine("Active project set to '{0}'", projectName);
+            }
+        }
+
+        public async Task Log(string[] args) {
+            HttpResponseMessage message = await _client.GetAsync(_tpConfig.Origin + "/api/project/" + WebUtility.UrlEncode(_tpConfig.ActiveProject));
+            if (message.StatusCode == HttpStatusCode.NotFound) {
+                Console.WriteLine("Cannot log to project '{0}' as it does not exist. Activate a different project.", _tpConfig.ActiveProject);
+            } else {
+                string messageContent = await message.Content.ReadAsStringAsync();
+                Project p = JsonConvert.DeserializeObject<Project>(messageContent);
+
+                Log l = new Log();
+                float hours;
+                if (Single.TryParse(args[1], out hours) == false) {
+                    Console.WriteLine("Incorrect hours format.");
+                    return;
+                }
+                l.Hours = hours;
+                l.Message = args[2];
+                l.ProjectId = p.Id;
+
+                string jsonContent = JsonConvert.SerializeObject(l);
+                await _client.PostAsync("http://localhost:5000/api/log", new StringContent(jsonContent, Encoding.UTF8, "application/json"));
+                Console.WriteLine("Logged {0} hours to project {1}.", hours, p.Name);
             }
         }
 

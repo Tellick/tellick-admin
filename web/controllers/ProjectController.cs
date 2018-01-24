@@ -16,12 +16,12 @@ namespace tellick_admin.Controllers {
 
         [HttpGet(Name = "GetAllProjects")]
         public IActionResult GetAllProjects() {
-            return Ok(_projectRepository.SearchFor());
+            return Ok(_projectRepository.SearchFor(includeProperties: "Customer"));
         }
 
         [HttpGet("{name}", Name = "GetProject")]
         public IActionResult GetProject(string name) {
-            Project p = _projectRepository.SearchFor(i => i.Name == name).SingleOrDefault();
+            Project p = _projectRepository.SearchFor(i => i.Name == name, includeProperties: "Customer").SingleOrDefault();
             if (p == null) return NotFound();
             return Ok(p);
         }

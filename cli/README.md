@@ -11,10 +11,10 @@ tp new project [projectname] -c [customername]
 tp active [projectname]
 
 ## log work for today (in hours), message is mandatory
-tp log [number] -m [message]
+tp log [number] [message]
 
 ## log work for a different date
-tp log [number] -d [yyyy-mm-dd] -m [message]
+tp log [number] [message] -d [yyyy-mm-dd] 
 
 ## set the hourly rate
 tp set rate [money]

@@ -8,6 +8,7 @@ namespace tellick_admin.Cli {
             TpConfig tpConfig = tpConfigReader.TpConfig;
             if (String.IsNullOrEmpty(tpConfig.Origin)) {
                 Console.WriteLine("Please use 'tp connect' to connect to an origin.");
+                return;
             }
 
             if (args.Length == 0) {
