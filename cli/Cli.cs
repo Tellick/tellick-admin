@@ -96,7 +96,7 @@ namespace tellick_admin.Cli {
             Customer c = new Customer();
             c.Name = args[2];
             string jsonContent = JsonConvert.SerializeObject(c);
-            await _client.PostAsync("http://localhost:5000/api/customer", new StringContent(jsonContent, Encoding.UTF8, "application/json"));
+            await _client.PostAsync(_tpConfig.Origin + "/api/customer", new StringContent(jsonContent, Encoding.UTF8, "application/json"));
 
             Console.WriteLine("Customer '{0}' created.", args[2]);
         }
@@ -110,7 +110,7 @@ namespace tellick_admin.Cli {
             string projectName = args[2];
             string customerName = args[3];
             
-            HttpResponseMessage message = await _client.GetAsync("http://localhost:5000/api/customer/" + WebUtility.UrlEncode(customerName));
+            HttpResponseMessage message = await _client.GetAsync(_tpConfig.Origin + "/api/customer/" + WebUtility.UrlEncode(customerName));
             string messageContent = await message.Content.ReadAsStringAsync();
             Customer customer = JsonConvert.DeserializeObject<Customer>(messageContent);
             if (customer != null) {
@@ -127,7 +127,7 @@ namespace tellick_admin.Cli {
 
         public async Task SetActive(string[] args) {
             string projectName = args[1];
-            HttpResponseMessage message = await _client.GetAsync("http://localhost:5000/api/project/" + WebUtility.UrlEncode(projectName));
+            HttpResponseMessage message = await _client.GetAsync(_tpConfig.Origin + "/api/project/" + WebUtility.UrlEncode(projectName));
             if (message.StatusCode == HttpStatusCode.NotFound) {
                 Console.WriteLine("Cannot activate project '{0}' as it does not exist!", projectName);
             } else {
@@ -140,7 +140,7 @@ namespace tellick_admin.Cli {
         }
 
         public async Task ShowCustomers() {
-            HttpResponseMessage message = await _client.GetAsync("http://localhost:5000/api/customer");
+            HttpResponseMessage message = await _client.GetAsync(_tpConfig.Origin + "/api/customer");
             string messageContent = await message.Content.ReadAsStringAsync();
             Customer[] customers = JsonConvert.DeserializeObject<Customer[]>(messageContent);
             foreach (var item in customers) {
@@ -149,7 +149,7 @@ namespace tellick_admin.Cli {
         }
 
         public async Task ShowProjects() {
-            HttpResponseMessage message = await _client.GetAsync("http://localhost:5000/api/project");
+            HttpResponseMessage message = await _client.GetAsync(_tpConfig.Origin + "/api/project");
             string messageContent = await message.Content.ReadAsStringAsync();
             Console.WriteLine(messageContent);
             Project[] projects = JsonConvert.DeserializeObject<Project[]>(messageContent);

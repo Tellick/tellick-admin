@@ -13,14 +13,15 @@ namespace tellick_admin.Controllers {
         }
 
         [HttpGet(Name = "GetAllCustomers")]
-        public IEnumerable<Customer> GetAllCustomers() {
-            return _customerRepository.SearchFor();
+        public IActionResult GetAllCustomers() {
+            return Ok(_customerRepository.SearchFor());
         }
 
         [HttpGet("{name}", Name = "GetCustomer")]
-        public Customer GetCustomer(string name) {
+        public IActionResult GetCustomer(string name) {
             Customer c = _customerRepository.SearchFor(i => i.Name == name).SingleOrDefault();
-            return c;
+            if (c == null) return NotFound();
+            return Ok(c);
         }
 
         [HttpPost]
