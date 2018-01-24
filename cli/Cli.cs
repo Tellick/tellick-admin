@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using System.Net;
+using System.Globalization;
 
 namespace tellick_admin.Cli {
     [DataContract]  
@@ -36,6 +37,8 @@ namespace tellick_admin.Cli {
         public float Hours { get; set; }
         [DataMember]  
         public string Message { get; set; }
+        [DataMember]  
+        public DateTime ForDate { get; set; }
         [DataMember]  
         public int ProjectId { get; set; }
     }
@@ -175,6 +178,17 @@ namespace tellick_admin.Cli {
                 l.Hours = hours;
                 l.Message = args[2];
                 l.ProjectId = p.Id;
+                DateTime forDate = DateTime.Now.Date;
+                if (args.Length == 4) {
+                    DateTime forDateParsed;
+                    if (DateTime.TryParseExact(args[3], "yyyy-M-d", null, DateTimeStyles.None, out forDateParsed)) {
+                        forDate = forDateParsed;
+                    } else {
+                        Console.WriteLine("Incorrect date! Use [yyyy-M-d]");
+                        return;
+                    }
+                }
+                l.ForDate = forDate;
 
                 string jsonContent = JsonConvert.SerializeObject(l);
                 await _client.PostAsync("http://localhost:5000/api/log", new StringContent(jsonContent, Encoding.UTF8, "application/json"));

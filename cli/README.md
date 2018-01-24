@@ -5,7 +5,7 @@ tp connect [url]
 tp new customer [customername]
 
 ## add a new project
-tp new project [projectname] -c [customername]
+tp new project [projectname] [customername]
 
 ## activate a project
 tp active [projectname]
@@ -14,7 +14,7 @@ tp active [projectname]
 tp log [number] [message]
 
 ## log work for a different date
-tp log [number] [message] -d [yyyy-mm-dd] 
+tp log [number] [message] [yyyy-mm-dd]
 
 ## set the hourly rate
 tp set rate [money]
