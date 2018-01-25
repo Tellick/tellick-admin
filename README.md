@@ -1,38 +1,45 @@
-## connect to the system, the system will ask you to login
-tp connect [url]
+# Tellick project tracking system
 
-## add a new customer
-tp new customer [customername]
+## Notes
+Database is in memory for the time being.
 
-## add a new project
-tp new project [projectname] [customername]
+## CLI usage
 
-## activate a project
-tp active [projectname]
+### connect to the system, the system will ask you to login
+- [x] tp connect [url]
 
-## log work for today (in hours), message is mandatory
-tp log [number] [message]
+### add a new customer
+- [x] tp new customer [customername]
 
-## log work for a different date
-tp log [number] [message] [yyyy-mm-dd]
+### add a new project
+- [x] tp new project [projectname] [customername]
 
-## set the hourly rate
-tp set rate [money]
+### activate a project
+- [x] tp active [projectname]
 
-## show progress in this month
-tp show
+### log work for today (in hours), message is mandatory
+- [x] tp log [number] [message]
 
-## show progress in a month
-tp show -d [yyyy-mm]
+### log work for a different date
+- [x] tp log [number] [message] [yyyy-mm-dd]
 
-## show progress in a year
-tp show -d [yyyy]
+### set the hourly rate
+- [ ] tp set rate [money]
 
-## generate invoices for this month
-tp invoice
+### show progress in this month
+- [ ] tp show
 
-## generate invoices for last month
-tp invoice lastmonth
+### show progress in a month
+- [ ] tp show -d [yyyy-mm]
 
-## generate invoices for a month
-tp invoice -d [yyyy-mm]
+### show progress in a year
+- [ ] tp show -d [yyyy]
+
+### generate invoices for this month
+- [ ] tp invoice
+
+### generate invoices for last month
+- [ ] tp invoice lastmonth
+
+### generate invoices for a month
+- [ ] tp invoice -d [yyyy-mm]
