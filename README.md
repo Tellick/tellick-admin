@@ -1,4 +1,5 @@
 # Tellick project tracking system
+This is work in progress.
 
 ## Notes
 Database is in memory for the time being.
