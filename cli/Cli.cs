@@ -140,7 +140,7 @@ namespace tellick_admin.Cli {
                 p.Name = projectName;
                 p.CustomerId = customer.Id;
                 string jsonContent = JsonConvert.SerializeObject(p);
-                await _client.PostAsync("http://localhost:5000/api/project", new StringContent(jsonContent, Encoding.UTF8, "application/json"));
+                await _client.PostAsync(_tpConfig.Origin + "/api/project", new StringContent(jsonContent, Encoding.UTF8, "application/json"));
                 Console.WriteLine("Project '{0}' created and connected to customer {1}.", projectName, customerName);
             } else {
                 Console.WriteLine("Unknown customer '{0}'", customerName);
@@ -191,7 +191,7 @@ namespace tellick_admin.Cli {
                 l.ForDate = forDate;
 
                 string jsonContent = JsonConvert.SerializeObject(l);
-                await _client.PostAsync("http://localhost:5000/api/log", new StringContent(jsonContent, Encoding.UTF8, "application/json"));
+                await _client.PostAsync(_tpConfig.Origin + "/api/log", new StringContent(jsonContent, Encoding.UTF8, "application/json"));
                 Console.WriteLine("Logged {0} hours to project {1}.", hours, p.Name);
             }
         }
