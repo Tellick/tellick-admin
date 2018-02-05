@@ -28,13 +28,13 @@ Database is in memory for the time being.
 - [ ] tp set rate [money]
 
 ### show progress in this month
-- [ ] tp show
+- [x] tp show
 
 ### show progress in a month
-- [ ] tp show [yyyy-mm]
+- [x] tp show [yyyy-mm]
 
 ### show progress in a year
-- [ ] tp show [yyyy]
+- [x] tp show [yyyy]
 
 ### generate invoices for this month
 - [ ] tp invoice
