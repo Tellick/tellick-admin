@@ -9,6 +9,7 @@ using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using System.Net;
 using System.Globalization;
+using System.Linq;
 
 namespace tellick_admin.Cli {
     [DataContract]  
@@ -27,6 +28,8 @@ namespace tellick_admin.Cli {
         public string Name { get; set; }
         [DataMember]
         public int CustomerId { get; set; }
+        [DataMember]
+        public Customer Customer { get; set; }
     }
 
     [DataContract]  
@@ -41,6 +44,8 @@ namespace tellick_admin.Cli {
         public DateTime ForDate { get; set; }
         [DataMember]  
         public int ProjectId { get; set; }
+        [DataMember]  
+        public int Project { get; set; }
     }
 
     public class Cli {
@@ -86,6 +91,9 @@ namespace tellick_admin.Cli {
                     } else {
                         await Log(args);
                     }
+                    break;
+                case "show":
+                    await Show(args);
                     break;
                 case "customers":
                     await ShowCustomers();
@@ -163,7 +171,7 @@ namespace tellick_admin.Cli {
 
         public async Task Log(string[] args) {
             HttpResponseMessage message = await _client.GetAsync(_tpConfig.Origin + "/api/project/" + WebUtility.UrlEncode(_tpConfig.ActiveProject));
-            if (message.StatusCode == HttpStatusCode.NotFound) {
+            if (message.StatusCode == HttpStatusCode.BadRequest) {
                 Console.WriteLine("Cannot log to project '{0}' as it does not exist. Activate a different project.", _tpConfig.ActiveProject);
             } else {
                 string messageContent = await message.Content.ReadAsStringAsync();
@@ -196,6 +204,51 @@ namespace tellick_admin.Cli {
             }
         }
 
+        public async Task Show(string[] args) {
+            if (args.Length > 2) {
+                Console.WriteLine("Invalid amount of arguments. Use 'tp show', tp show [yyyy] or tp show [yyyy-M].");
+                return;
+            }
+            string url = _tpConfig.Origin + "/api/log/" + WebUtility.UrlEncode(_tpConfig.ActiveProject);
+            if (args.Length == 2) {
+                string[] parts = args[1].Split('-');
+                int year;
+                int month;
+                if (parts.Length > 2) {
+                    Console.WriteLine("Invalid date. Use 'tp show', tp show [yyyy] or tp show [yyyy-M].");
+                }
+                if (parts.Length == 1) {
+                    if (Int32.TryParse(parts[0], out year)) {
+                        url += "/" + year.ToString();
+                    } else {
+                        Console.WriteLine("Invalid year!");
+                    }
+                }
+                if (parts.Length == 2) {
+                    if (Int32.TryParse(parts[0], out year) && Int32.TryParse(parts[1], out month) && month >= 1 && month <= 12) {
+                        url += "/" + year.ToString() + "-" + month.ToString();
+                    } else {
+                        Console.WriteLine("Invalid date! Use 'tp show', tp show [yyyy] or tp show [yyyy-M].");
+                    }
+                }
+            }
+            HttpResponseMessage message = await _client.GetAsync(url);
+            if (message.StatusCode == HttpStatusCode.BadRequest) {
+                Console.WriteLine("Cannot show log to project '{0}' as it does not exist. Activate a different project.", _tpConfig.ActiveProject);
+            } else {            
+                string messageContent = await message.Content.ReadAsStringAsync();
+                Log[] logs = JsonConvert.DeserializeObject<Log[]>(messageContent);
+                Console.WriteLine("Log for project '{0}' in month '{1}':", _tpConfig.ActiveProject, DateTime.Now.ToString("yyyy-M"));
+                Console.WriteLine();
+                Console.WriteLine("{0, -10} {1}", "Date", "Hours");
+                foreach (var item in logs) {
+                    Console.WriteLine("{0, -10} {1}", item.ForDate.ToString("yyyy-M-d"), item.Hours);
+                }
+                Console.WriteLine("--------------------");
+                Console.WriteLine("   TOTAL: {0}", logs.Sum(i => i.Hours));
+            }
+        }
+
         public async Task ShowCustomers() {
             HttpResponseMessage message = await _client.GetAsync(_tpConfig.Origin + "/api/customer");
             string messageContent = await message.Content.ReadAsStringAsync();
@@ -208,10 +261,9 @@ namespace tellick_admin.Cli {
         public async Task ShowProjects() {
             HttpResponseMessage message = await _client.GetAsync(_tpConfig.Origin + "/api/project");
             string messageContent = await message.Content.ReadAsStringAsync();
-            Console.WriteLine(messageContent);
             Project[] projects = JsonConvert.DeserializeObject<Project[]>(messageContent);
             foreach (var item in projects) {
-                Console.WriteLine("{0, -5} {1, -20} {2}", item.Id, item.Name, item.CustomerId);
+                Console.WriteLine("{0, -5} {1, -20} {2}", item.Id, item.Name, item.Customer.Name);
             }
         }
     }

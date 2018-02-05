@@ -31,10 +31,10 @@ Database is in memory for the time being.
 - [ ] tp show
 
 ### show progress in a month
-- [ ] tp show -d [yyyy-mm]
+- [ ] tp show [yyyy-mm]
 
 ### show progress in a year
-- [ ] tp show -d [yyyy]
+- [ ] tp show [yyyy]
 
 ### generate invoices for this month
 - [ ] tp invoice

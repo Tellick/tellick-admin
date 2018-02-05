@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
@@ -19,10 +20,41 @@ namespace tellick_admin.Controllers {
             return NotFound();
         }
 
-        [HttpGet("{projectName}", Name = "GetLogByProjectName")]
-        public IActionResult GetLogByProjectName(string projectName) {
-            Log[] logs = _logRepository.SearchFor(i => i.Project.Name == projectName, includeProperties: "Project").ToArray();
+        [HttpGet("{projectName}", Name = "GetLog")]
+        public IActionResult GetLog(string projectName) {
+            int year = DateTime.Now.Year;
+            int month = DateTime.Now.Month;
+            Log[] logs = _logRepository.SearchFor(i => i.Project.Name == projectName && i.ForDate.Month == month && i.ForDate.Year == year, includeProperties: "Project").ToArray();
             return Ok(logs);
+        }
+
+        [HttpGet("{projectName}/{dateSpecification}", Name = "GetLogByProjectName")]
+        public IActionResult GetLogSpecific(string projectName, string dateSpecification) {
+            Project p = _projectRepository.SearchFor(i => i.Name == projectName).SingleOrDefault();
+            if (p == null) BadRequest("Project does not exist");
+            
+            // DateSpecification is either yyyy or yyyy-M and nothing else
+            string[] parts = dateSpecification.Split('-');
+            if (parts.Length == 1) {
+                int year;
+                if (Int32.TryParse(parts[0], out year)) {
+                    Log[] logs = _logRepository.SearchFor(i => i.Project.Name == projectName && i.ForDate.Year == year, includeProperties: "Project").ToArray();
+                    return Ok(logs);
+                } else {
+                    return BadRequest();
+                }
+            }
+            if (parts.Length == 2) {
+                int year;
+                int month;
+                if (Int32.TryParse(parts[0], out year) && Int32.TryParse(parts[1], out month) && month >= 1 && month <= 12) {
+                    Log[] logs = _logRepository.SearchFor(i => i.Project.Name == projectName && i.ForDate.Month == month && i.ForDate.Year == year, includeProperties: "Project").ToArray();
+                    return Ok(logs);
+                } else {
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
         }
 
         [HttpPost]
