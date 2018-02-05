@@ -14,7 +14,9 @@ namespace tellick_admin {
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services) {
-            services.AddDbContext<TellickAdminContext>(opt => opt.UseInMemoryDatabase("TellickAdmin"));
+            services.AddDbContext<TellickAdminContext>(options => options
+                .UseSqlServer("Server=.;Database=tellick-admin;Trusted_Connection=True;", providerOptions=>providerOptions.CommandTimeout(60))
+                .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)); //opt.UseInMemoryDatabase("TellickAdmin"));
             services.AddMvc();
         }
 

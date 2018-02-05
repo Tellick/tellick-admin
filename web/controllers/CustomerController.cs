@@ -26,7 +26,10 @@ namespace tellick_admin.Controllers {
 
         [HttpPost]
         public IActionResult Create([FromBody] Customer item) {
-            if (item == null) return BadRequest();
+            if (item == null) return BadRequest("No customer data provided.");
+
+            Customer c = _customerRepository.SearchFor(i => i.Name == item.Name).SingleOrDefault();
+            if (c != null) return BadRequest("Customer name already exists.");
 
             _customerRepository.Insert(item);
             _customerRepository.Save();

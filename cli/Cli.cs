@@ -45,7 +45,7 @@ namespace tellick_admin.Cli {
         [DataMember]  
         public int ProjectId { get; set; }
         [DataMember]  
-        public int Project { get; set; }
+        public Project Project { get; set; }
     }
 
     public class Cli {
@@ -126,9 +126,16 @@ namespace tellick_admin.Cli {
             Customer c = new Customer();
             c.Name = args[2];
             string jsonContent = JsonConvert.SerializeObject(c);
-            await _client.PostAsync(_tpConfig.Origin + "/api/customer", new StringContent(jsonContent, Encoding.UTF8, "application/json"));
+            HttpResponseMessage message =  await _client.PostAsync(_tpConfig.Origin + "/api/customer", new StringContent(jsonContent, Encoding.UTF8, "application/json"));
 
-            Console.WriteLine("Customer '{0}' created.", args[2]);
+            if (message.StatusCode == HttpStatusCode.OK) {
+                Console.WriteLine("Customer '{0}' created.", args[2]);
+            } else if (message.StatusCode == HttpStatusCode.BadRequest) {
+                string messageContent = await message.Content.ReadAsStringAsync();
+                Console.WriteLine("Failed: ", messageContent);
+            } else {
+                Console.WriteLine("Failed and I don't know why... :(");
+            }
         }
 
         public async Task CreateProject(string[] args) {
@@ -245,7 +252,7 @@ namespace tellick_admin.Cli {
                     Console.WriteLine("{0, -10} {1}", item.ForDate.ToString("yyyy-M-d"), item.Hours);
                 }
                 Console.WriteLine("--------------------");
-                Console.WriteLine("   TOTAL: {0}", logs.Sum(i => i.Hours));
+                Console.WriteLine("TOTAL      {0}", logs.Sum(i => i.Hours));
             }
         }
 
