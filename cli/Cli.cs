@@ -53,8 +53,9 @@ namespace tellick_admin.Cli {
         private readonly TpConfig _tpConfig;
 
         public Cli(TpConfig tpConfig) {
-            _client  = new HttpClient();
             _tpConfig = tpConfig;
+            _client  = new HttpClient();
+            _client.DefaultRequestHeaders.Add("Authorization", new string[] { "Bearer " + _tpConfig.Bearer });
         }
 
         public async Task ParseAndRun(string[] args) {
@@ -134,7 +135,7 @@ namespace tellick_admin.Cli {
                 string messageContent = await message.Content.ReadAsStringAsync();
                 Console.WriteLine("Failed: ", messageContent);
             } else {
-                Console.WriteLine("Failed and I don't know why... :(");
+                Console.WriteLine("Error: {0}", message.StatusCode.ToString());
             }
         }
 
@@ -155,8 +156,12 @@ namespace tellick_admin.Cli {
                 p.Name = projectName;
                 p.CustomerId = customer.Id;
                 string jsonContent = JsonConvert.SerializeObject(p);
-                await _client.PostAsync(_tpConfig.Origin + "/api/project", new StringContent(jsonContent, Encoding.UTF8, "application/json"));
-                Console.WriteLine("Project '{0}' created and connected to customer {1}.", projectName, customerName);
+                HttpResponseMessage response = await _client.PostAsync(_tpConfig.Origin + "/api/project", new StringContent(jsonContent, Encoding.UTF8, "application/json"));
+                if (response.StatusCode == HttpStatusCode.OK) {
+                    Console.WriteLine("Project '{0}' created and connected to customer {1}.", projectName, customerName);
+                } else {
+                    Console.WriteLine("Error: {0}", message.StatusCode.ToString());
+                }
             } else {
                 Console.WriteLine("Unknown customer '{0}'", customerName);
             }
@@ -167,12 +172,14 @@ namespace tellick_admin.Cli {
             HttpResponseMessage message = await _client.GetAsync(_tpConfig.Origin + "/api/project/" + WebUtility.UrlEncode(projectName));
             if (message.StatusCode == HttpStatusCode.NotFound) {
                 Console.WriteLine("Cannot activate project '{0}' as it does not exist!", projectName);
-            } else {
+            } else if (message.StatusCode == HttpStatusCode.OK) {
                 _tpConfig.ActiveProject = projectName;
                 TpConfigReaderWriter tpConfigReaderWriter = new TpConfigReaderWriter();
                 tpConfigReaderWriter.TpConfig = _tpConfig;
                 await tpConfigReaderWriter.WriteConfig();
                 Console.WriteLine("Active project set to '{0}'", projectName);
+            } else {
+                Console.WriteLine("Error: {0}", message.StatusCode.ToString());
             }
         }
 
@@ -180,7 +187,7 @@ namespace tellick_admin.Cli {
             HttpResponseMessage message = await _client.GetAsync(_tpConfig.Origin + "/api/project/" + WebUtility.UrlEncode(_tpConfig.ActiveProject));
             if (message.StatusCode == HttpStatusCode.BadRequest) {
                 Console.WriteLine("Cannot log to project '{0}' as it does not exist. Activate a different project.", _tpConfig.ActiveProject);
-            } else {
+            } else if (message.StatusCode == HttpStatusCode.OK) {
                 string messageContent = await message.Content.ReadAsStringAsync();
                 Project p = JsonConvert.DeserializeObject<Project>(messageContent);
 
@@ -206,8 +213,14 @@ namespace tellick_admin.Cli {
                 l.ForDate = forDate;
 
                 string jsonContent = JsonConvert.SerializeObject(l);
-                await _client.PostAsync(_tpConfig.Origin + "/api/log", new StringContent(jsonContent, Encoding.UTF8, "application/json"));
-                Console.WriteLine("Logged {0} hours to project {1}.", hours, p.Name);
+                HttpResponseMessage response = await _client.PostAsync(_tpConfig.Origin + "/api/log", new StringContent(jsonContent, Encoding.UTF8, "application/json"));
+                if (response.StatusCode == HttpStatusCode.OK) {
+                    Console.WriteLine("Logged {0} hours to project {1}.", hours, p.Name);
+                } else {
+                    Console.WriteLine("Error: {0}", message.StatusCode.ToString());
+                }
+            } else {
+                Console.WriteLine("Error: {0}", message.StatusCode.ToString());
             }
         }
 
@@ -240,9 +253,7 @@ namespace tellick_admin.Cli {
                 }
             }
             HttpResponseMessage message = await _client.GetAsync(url);
-            if (message.StatusCode == HttpStatusCode.BadRequest) {
-                Console.WriteLine("Cannot show log to project '{0}' as it does not exist. Activate a different project.", _tpConfig.ActiveProject);
-            } else {            
+            if (message.StatusCode == HttpStatusCode.OK) {
                 string messageContent = await message.Content.ReadAsStringAsync();
                 Log[] logs = JsonConvert.DeserializeObject<Log[]>(messageContent);
                 Console.WriteLine("Log for project '{0}' in month '{1}':", _tpConfig.ActiveProject, DateTime.Now.ToString("yyyy-M"));
@@ -253,15 +264,23 @@ namespace tellick_admin.Cli {
                 }
                 Console.WriteLine("--------------------");
                 Console.WriteLine("TOTAL      {0}", logs.Sum(i => i.Hours));
+            } else if (message.StatusCode == HttpStatusCode.BadRequest) {
+                Console.WriteLine("Cannot show log to project '{0}' as it does not exist. Activate a different project.", _tpConfig.ActiveProject);
+            } else {
+                Console.WriteLine("Error: {0}", message.StatusCode.ToString());
             }
         }
 
         public async Task ShowCustomers() {
             HttpResponseMessage message = await _client.GetAsync(_tpConfig.Origin + "/api/customer");
             string messageContent = await message.Content.ReadAsStringAsync();
-            Customer[] customers = JsonConvert.DeserializeObject<Customer[]>(messageContent);
-            foreach (var item in customers) {
-                Console.WriteLine("{0, -5} {1}", item.Id, item.Name);
+            if (message.StatusCode == HttpStatusCode.OK) {
+                Customer[] customers = JsonConvert.DeserializeObject<Customer[]>(messageContent);
+                foreach (var item in customers) {
+                    Console.WriteLine("{0, -5} {1}", item.Id, item.Name);
+                }
+            } else {
+                Console.WriteLine("Error: {0}", message.StatusCode.ToString());
             }
         }
 

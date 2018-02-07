@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using tellick_admin.Repository;
 
 namespace tellick_admin.Controllers {
+    [Authorize]
     [Route("api/[controller]")]
     public class LogController : Controller {
         private GenericRepository<Project> _projectRepository;

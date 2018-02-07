@@ -11,7 +11,9 @@ namespace tellick_admin.Cli {
         [DataMember]
         public string Origin { get; set; }
         [DataMember]
-        public string ActiveProject { get; set; }
+        public string Bearer { get; set; }
+        [DataMember]
+        public string ActiveProject { get; set; }        
     }
     
     public class TpConfigReaderWriter {
